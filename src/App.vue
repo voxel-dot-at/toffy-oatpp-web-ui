@@ -41,14 +41,12 @@ const route = useRoute();
 
 <style scoped>
 .v-main {
-  min-height: 100%;
   display: flex;
   flex-direction: column;
 }
 
 .v-footer {
-  display: flex;
-  align-items: center;
+  flex: none;
   justify-content: center;
   font-size: 0.85rem;
   gap: 10px;

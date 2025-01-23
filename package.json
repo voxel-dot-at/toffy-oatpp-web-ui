@@ -1,8 +1,9 @@
 {
   "name": "toffy-oatpp-web-ui",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
+  "author": "Ferman GÜZEL",
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
