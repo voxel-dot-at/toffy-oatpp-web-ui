@@ -2,6 +2,8 @@
 
 This is a Vue 3 project built with Vite and Vuetify. The project is part of the `toffy-oatpp` project. To properly retrieve and display the data, the `toffy-oatpp` project needs to be built and run. The `toffy-oatpp-web-ui` project displays a list of real-time images and settings retrieved from the `toffy-oatpp` API and provides functionality to view details and images. The user interface includes vertically listed cards for each real-time image and setting, and buttons for detailed views and image displays.
 
+![toffy-oatpp-web-ui_2](https://github.com/user-attachments/assets/097b4099-1153-46a6-8099-780ab0368014)
+
 ## Project Structure
 
 - **Vue 3**
