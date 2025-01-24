@@ -22,6 +22,9 @@ const route = useRoute();
       <v-list density="compact" nav>
         <!-- Home link with active state -->
         <v-list-item prepend-icon="mdi-home-city" title="Home" value="home" :active="route.path === '/'" @click="$router.push('/')" @click.stop="rail = true"></v-list-item>
+
+        <!-- Dto link with active state -->
+        <v-list-item prepend-icon="mdi-cog" title="Dto" value="dto" :active="route.path === '/dto'" @click="$router.push('/dto')" @click.stop="rail = true"></v-list-item>
       </v-list>
     </v-navigation-drawer>
 

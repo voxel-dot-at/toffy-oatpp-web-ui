@@ -13,8 +13,8 @@ const vuetify = createVuetify({
   components,
   directives,
   defaults: {
-    VBtn: { variant: "elevated", color: "primary", stacked:true, size:"x-small" },
-    VTextField: { variant: "solo", type:"number", class:"flex-grow-1" },
+    VBtn: { variant: "elevated", color: "primary", stacked: true, size: "x-small" },
+    VTextField: { variant: "solo", type: "number", class: "flex-grow-1" },
   },
   theme: {
     defaultTheme: "light",
