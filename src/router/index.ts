@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import DtoView from "@/views/DtoView.vue";
+import BtaView from "@/views/BtaView.vue";
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
@@ -11,9 +11,9 @@ const router = createRouter({
       component: HomeView,
     },
     {
-      path: "/dto",
-      name: "dto",
-      component: DtoView,
+      path: "/bta",
+      name: "bta",
+      component: BtaView,
     },
   ],
 });
