@@ -80,12 +80,6 @@ const fetchAmplImage = async () => {
   }
 };
 
-// Helper function for error messages
-const setError = (message: string) => {
-  errorMessage.value = message;
-  loading.value = false;
-};
-
 // Function to fetch data from /api/bta and populate textboxes
 const fetchSettings = async () => {
   try {
@@ -132,7 +126,7 @@ const fetchAmplMinMax = async () => {
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
-}
+};
 
 // Function to fetch frame data
 const fetchFrameInfo = async () => {
@@ -179,7 +173,7 @@ const fetchSingleSetting = async (setting: keyof typeof settings) => {
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
-}
+};
 
 // Function to fetch single settings based on the type
 const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
@@ -206,7 +200,7 @@ const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
-}
+};
 
 // Function to fetch single settings based on the type
 const fetchSingleAmplMinMax = async (setting: keyof typeof amplMinMax) => {
@@ -233,7 +227,7 @@ const fetchSingleAmplMinMax = async (setting: keyof typeof amplMinMax) => {
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
-}
+};
 
 // Functions to post the updated settings
 const postSetting = async (setting: keyof typeof settings, value: number) => {
@@ -329,6 +323,12 @@ const postAmplMinMax = async (setting: keyof typeof amplMinMax, value: number) =
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
+};
+
+// Helper function for error messages
+const setError = (message: string) => {
+  errorMessage.value = message;
+  loading.value = false;
 };
 
 // Fetch lives, settings, and frame data on page load

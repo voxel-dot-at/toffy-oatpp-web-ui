@@ -19,12 +19,6 @@ const settings = reactive({
   globalOffset: 0,
 });
 
-// Helper function for error messages
-const setError = (message: unknown) => {
-  errorMessage.value = message;
-  loading.value = false;
-};
-
 // Function to fetch data from /api/bta and populate settings
 const fetchSettings = async () => {
   try {
@@ -114,6 +108,12 @@ const postSetting = async (setting: keyof typeof settings, value: number | boole
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
+};
+
+// Helper function for error messages
+const setError = (message: unknown) => {
+  errorMessage.value = message;
+  loading.value = false;
 };
 
 // Fetch settings on page load
