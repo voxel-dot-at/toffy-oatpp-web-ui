@@ -5,8 +5,11 @@ import { onMounted, reactive, ref } from "vue";
 // State variables for components
 const loading = ref(false);
 const snackbar = ref(false);
-const errorMessage = ref<string | null>(null);
+const errorMessage = ref<unknown>();
 const snackbarMessage = ref<string>();
+const adressValue = ref<string>('');
+const registerAdress = ref<string>('');
+const registerValue = ref<string>('');
 
 // Reactive object for /api/bta settings
 const settings = reactive({
@@ -17,7 +20,7 @@ const settings = reactive({
 });
 
 // Helper function for error messages
-const setError = (message: string | null) => {
+const setError = (message: unknown) => {
   errorMessage.value = message;
   loading.value = false;
 };
@@ -27,18 +30,71 @@ const fetchSettings = async () => {
   try {
     const response = await axios.get("/api/bta");
     Object.assign(settings, response.data);
-  } catch (error) {
-    console.error("Error fetching settings:", error);
-    setError("Failed to load settings. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to get settings: ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
+  }
+};
+
+const fetchRegister = async () => {
+  if (!adressValue.value) {
+    setError(`Please enter a valid Value for Register Adress`)
+    return;
+  }
+
+  const adress = adressValue.value.startsWith('0x')
+    ? parseInt(adressValue.value, 16)
+    : parseInt(adressValue.value, 10);
+
+  try {
+    const response = await axios.get(`/api/bta/reg/${adress}`);
+    registerAdress.value = response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to get register address: ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
+  }
+};
+
+const postRegister = async () =>{
+  if (!adressValue.value) {
+    setError(`Please enter a valid Value for Register Adress`)
+    return;
+  }
+
+  if (!registerValue.value) {
+    setError(`Please enter a valid value for New Register Value`)
+    return;
+  }
+
+  const adress = adressValue.value.startsWith('0x')
+    ? parseInt(adressValue.value, 16)
+    : parseInt(adressValue.value, 10);
+
+  const value = registerValue.value.startsWith('0x')
+    ? parseInt(registerValue.value, 16)
+    : parseInt(registerValue.value, 10);
+
+  try {
+    const response = await axios.post(`/api/bta/reg/${adress}/${value}`);
+    registerAdress.value = response.data;
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to set register address: ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
 // Function to post the updated setting
-const postSetting = async (
-  setting: keyof typeof settings,
-  value: number | boolean
-) => {
-  if (value === null) {
+const postSetting = async (setting: keyof typeof settings, value: number | boolean) => {
+  if (!value) {
     setError(`Please enter a valid value for ${setting}.`);
     return;
   }
@@ -51,9 +107,12 @@ const postSetting = async (
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
-  } catch (error) {
-    console.error(`Error setting ${setting}:`, error);
-    setError(`Failed to set ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to set ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -83,7 +142,7 @@ onMounted(() => {
 
     <!-- Error Alert -->
     <v-row v-if="errorMessage">
-      <v-alert type="error" class="mx-auto" elevation="2" closable>
+      <v-alert type="error" class="mx-auto" elevation="2">
         {{ errorMessage }}
       </v-alert>
     </v-row>
@@ -96,8 +155,10 @@ onMounted(() => {
 
     <!-- Card with Textboxes, Buttons, and WBOX Data -->
     <v-row>
-      <v-col cols="12">
+      <!-- BTA Settings -->
+      <v-col cols="12" lg="6">
         <v-card elevation="8">
+          <v-card-title class="text-h6">BTA Settings</v-card-title>
           <v-card-text>
             <v-row>
               <v-col>
@@ -107,29 +168,55 @@ onMounted(() => {
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="12" md="6" lg="4" class="d-flex">
+              <v-col cols="12" sm="6" class="d-flex">
                 <v-text-field v-model="settings.integrationTime" label="Integration Time" @keyup.enter="postSetting('integrationTime', settings.integrationTime!)"></v-text-field>
                 <v-btn prepend-icon="mdi-send-check" class="square-btn" color="secondary" @click="postSetting('integrationTime', settings.integrationTime!)">
                   Set
                 </v-btn>
               </v-col>
-              <v-col cols="12" md="6" lg="4" class="d-flex">
+              <v-col cols="12" sm="6" class="d-flex">
                 <v-text-field v-model="settings.modulationFrequency" label="Modulation Frequency" @keyup.enter=" postSetting('modulationFrequency', settings.modulationFrequency!)"></v-text-field>
                 <v-btn prepend-icon="mdi-send-check" class="square-btn" color="secondary" @click=" postSetting('modulationFrequency', settings.modulationFrequency!)">
                   Set
                 </v-btn>
               </v-col>
-              <v-col cols="12" md="6" lg="4" class="d-flex">
+              <v-col cols="12" sm="6" class="d-flex">
                 <v-text-field v-model="settings.frameRate" label="Frame Rate" @keyup.enter="postSetting('frameRate', settings.frameRate!)"></v-text-field>
                 <v-btn prepend-icon="mdi-send-check" class="square-btn" color="secondary" @click="postSetting('frameRate', settings.frameRate!)">
                   Set
                 </v-btn>
               </v-col>
-              <v-col cols="12" md="6" lg="4" class="d-flex">
+              <v-col cols="12" sm="6" class="d-flex">
                 <v-text-field v-model="settings.globalOffset" label="Global Offset" @keyup.enter="postSetting('globalOffset', settings.globalOffset!)"></v-text-field>
                 <v-btn prepend-icon="mdi-send-check" class="square-btn" color="secondary" @click="postSetting('globalOffset', settings.globalOffset!)">
                   Set
                 </v-btn>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </v-card>
+      </v-col>
+
+      <!-- Register Adress -->
+      <v-col cols="12" lg="6">
+        <v-card elevation="8">
+          <v-card-title class="text-h6">Register Adress</v-card-title>
+          <v-card-text>
+            <v-row>
+              <v-col cols="12" sm="6" class="d-flex">
+                <v-text-field type="string" label="Register Adress" v-model="adressValue" hint="Enter decimal (123) or hex (0xabc)" @keyup.enter="fetchRegister"></v-text-field>
+                <v-btn prepend-icon="mdi-download" class="square-btn" color="primary" @click="fetchRegister">
+                  Get
+                </v-btn>
+              </v-col>
+              <v-col cols="12" sm="6" class="d-flex">
+                <v-text-field type="string" label="New Register Vaue" v-model="registerValue" hint="Enter decimal (123) or hex (0xabc)" @keyup.enter="fetchRegister"></v-text-field>
+                <v-btn prepend-icon="mdi-send-check" class="square-btn" color="secondary" @click="postRegister">
+                  Set
+                </v-btn>
+              </v-col>
+              <v-col cols="12" sm="5" class="d-flex">
+                <v-text-field type="string" label="Register Value" variant="underlined" v-model="registerAdress" readonly></v-text-field>
               </v-col>
             </v-row>
           </v-card-text>

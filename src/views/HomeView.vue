@@ -5,7 +5,7 @@ import { onMounted, onUnmounted, reactive, ref } from "vue";
 // State variables for components
 const loading = ref(false);
 const snackbar = ref(false);
-const errorMessage = ref<string | null>(null);
+const errorMessage = ref<unknown>();
 const snackbarMessage = ref<string>();
 const depthImage = ref("");
 const amplImage = ref("");
@@ -47,8 +47,12 @@ const fetchDepthImage = async () => {
 
     // Set the Object URLs
     depthImage.value = depthUrl;
-  } catch (error) {
-    setError("Failed to load images. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load Depth Image : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -67,13 +71,17 @@ const fetchAmplImage = async () => {
 
     // Set the Object URLs
     amplImage.value = amplUrl;
-  } catch (error) {
-    setError("Failed to load images. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load Amplitude Image : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
 // Helper function for error messages
-const setError = (message: string | null) => {
+const setError = (message: string) => {
   errorMessage.value = message;
   loading.value = false;
 };
@@ -83,8 +91,12 @@ const fetchSettings = async () => {
   try {
     const response = await axios.get("/api/bta");
     Object.assign(settings, response.data);
-  } catch (error) {
-    setError("Failed to load settings. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load settings : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -96,8 +108,12 @@ const fetchDepthMinMax = async () => {
 
     depthMinMax.maxVal = parseFloat(depthMinMax.maxVal.toFixed(3));
     depthMinMax.minVal = parseFloat(depthMinMax.minVal.toFixed(3));
-  } catch (error) {
-    setError("Failed to load Depth Min & Max values. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load Depth Min & Max values : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -109,8 +125,12 @@ const fetchAmplMinMax = async () => {
 
     amplMinMax.maxVal = parseFloat(amplMinMax.maxVal.toFixed(3));
     amplMinMax.minVal = parseFloat(amplMinMax.minVal.toFixed(3));
-  } catch (error) {
-    setError("Failed to load Amplitude Min & Max values. Please try again later")
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load Amplitude Min & Max values : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 }
 
@@ -119,8 +139,12 @@ const fetchFrameInfo = async () => {
   try {
     const response = await axios.get("/api/frame/info");
     Object.assign(frameInfo, response.data);
-  } catch (error) {
-    setError("Failed to load frame info. Please try again later.");
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to load frame info : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -148,8 +172,12 @@ const fetchSingleSetting = async (setting: keyof typeof settings) => {
   try {
     const response = await axios.get(url);
     settings[setting] = response.data;
-  } catch (error) {
-    setError(`Failed to get ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to get ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 }
 
@@ -171,8 +199,12 @@ const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
   try {
     const response = await axios.get(url);
     depthMinMax[setting] = response.data;
-  } catch (error) {
-    setError(`Failed to get ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to get ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 }
 
@@ -194,8 +226,12 @@ const fetchSingleAmplMinMax = async (setting: keyof typeof amplMinMax) => {
   try {
     const response = await axios.get(url);
     depthMinMax[setting] = response.data;
-  } catch (error) {
-    setError(`Failed to get ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to get ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 }
 
@@ -226,8 +262,12 @@ const postSetting = async (setting: keyof typeof settings, value: number) => {
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
-  } catch (error) {
-    setError(`Failed to set ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to set ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -252,8 +292,12 @@ const postDepthMinMax = async (setting: keyof typeof depthMinMax, value: number)
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
-  } catch (error) {
-    setError(`Failed to set ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to set ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -278,8 +322,12 @@ const postAmplMinMax = async (setting: keyof typeof amplMinMax, value: number) =
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
-  } catch (error) {
-    setError(`Failed to set ${setting}. Please try again later.`);
+  } catch (error: any) {
+    if (error.response && error.response.status === 400) {
+      setError(`Failed to set ${setting} : ${error.response.data}`);
+    } else {
+      setError(`An unexpected error occurred: ${error.message}`);
+    }
   }
 };
 
@@ -347,7 +395,7 @@ onMounted(() => {
 
     <!-- Error Alert -->
     <v-row v-if="errorMessage">
-      <v-alert type="error" class="mx-auto" elevation="2" closable>
+      <v-alert type="error" class="mx-auto" elevation="2">
         {{ errorMessage }}
       </v-alert>
     </v-row>
