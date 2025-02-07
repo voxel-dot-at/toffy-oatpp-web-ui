@@ -401,9 +401,8 @@ onMounted(() => {
     </v-row>
 
     <!-- Success Alert -->
-    <v-snackbar v-model="snackbar" :timeout="3000" top color="success">
-      {{ snackbarMessage }}
-      <v-btn color="white" text="true" @click="snackbar = false"> Close </v-btn>
+    <v-snackbar v-model="snackbar" :timeout="2000" rounded="pill" color="success">
+    {{ snackbarMessage }}
     </v-snackbar>
 
     <v-row>
