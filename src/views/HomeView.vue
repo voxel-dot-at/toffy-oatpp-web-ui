@@ -5,7 +5,7 @@ import { onMounted, onUnmounted, reactive, ref } from "vue";
 // State variables for components
 const loading = ref(false);
 const snackbar = ref(false);
-const errorMessage = ref<unknown>();
+const errorMessage = ref<string>();
 const snackbarMessage = ref<string>();
 const depthImage = ref("");
 const amplImage = ref("");

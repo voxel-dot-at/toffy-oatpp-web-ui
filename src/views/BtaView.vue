@@ -5,7 +5,7 @@ import { onMounted, reactive, ref } from "vue";
 // State variables for components
 const loading = ref(false);
 const snackbar = ref(false);
-const errorMessage = ref<unknown>();
+const errorMessage = ref<string>();
 const snackbarMessage = ref<string>();
 const adressValue = ref<string>('');
 const registerAdress = ref<string>('');
@@ -111,7 +111,7 @@ const postSetting = async (setting: keyof typeof settings, value: number | boole
 };
 
 // Helper function for error messages
-const setError = (message: unknown) => {
+const setError = (message: string) => {
   errorMessage.value = message;
   loading.value = false;
 };
