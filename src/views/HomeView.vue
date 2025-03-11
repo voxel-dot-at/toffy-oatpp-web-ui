@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from "axios";
-import { onMounted, onUnmounted, reactive, ref } from "vue";
+import { getCurrentInstance, onMounted, onUnmounted, reactive, ref } from "vue";
 
 // State variables for components
 const loading = ref(false);
@@ -18,13 +18,13 @@ const settings = reactive({
   frameRate: 0,
   globalOffset: 0,
 });
-const depthMinMax = reactive ({
+const depthMinMax = reactive({
   maxVal: 0,
   minVal: 0,
 });
 const amplMinMax = reactive({
-  maxVal:0,
-  minVal:0,
+  maxVal: 0,
+  minVal: 0,
 });
 const frameInfo = reactive({
   fc: 0,
@@ -335,6 +335,29 @@ const setError = (message: string) => {
 onMounted(() => {
   loading.value = true;
 
+  const instance = getCurrentInstance();
+
+  const socket = instance!.appContext.config.globalProperties.$socket;
+
+  socket.on("connect", () => {
+    console.log("Socket.IO connected");
+    loading.value = false;
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket.IO disconnected");
+    loading.value = false;
+  });
+
+  socket.on("error", (error: { message: any; }) => {
+    setError(`Socket.IO error: ${error.message}`);
+  });
+
+  socket.on("frameInfo", (data: any) => {
+    console.log("Received frameInfo:", data);
+    Object.assign(frameInfo, data);
+  });
+
   fetchDepthImage();
   fetchAmplImage();
   fetchFrameInfo();
@@ -374,6 +397,7 @@ onMounted(() => {
   onUnmounted(() => {
     stopInterval();
     document.removeEventListener("visibilitychange", handleVisibilityChange);
+    socket.disconnect();
   });
 });
 </script>

@@ -1,4 +1,5 @@
 import "@mdi/font/css/materialdesignicons.css";
+import { io } from "socket.io-client";
 import { createApp } from "vue";
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
@@ -23,6 +24,15 @@ const vuetify = createVuetify({
     defaultSet: "mdi",
   },
 });
+
+const socket = io("http://localhost:8000", {
+  transports: ["websocket", "polling"],
+  reconnection: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+});
+
+app.config.globalProperties.$socket = socket;
 
 try {
   app.use(router);
