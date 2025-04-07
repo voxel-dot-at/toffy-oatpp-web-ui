@@ -25,8 +25,8 @@ const vuetify = createVuetify({
   },
 });
 
-const socket = io("http://localhost:8000", {
-  transports: ["websocket", "polling"],
+const socket = io("ws://localhost:8000/cam", {
+  transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,

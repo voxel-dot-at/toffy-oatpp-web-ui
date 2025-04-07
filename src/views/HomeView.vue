@@ -128,20 +128,6 @@ const fetchAmplMinMax = async () => {
   }
 };
 
-// Function to fetch frame data
-const fetchFrameInfo = async () => {
-  try {
-    const response = await axios.get("/api/frame/info");
-    Object.assign(frameInfo, response.data);
-  } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load frame info : ${error.response.data}`);
-    } else {
-      setError(`An unexpected error occurred: ${error.message}`);
-    }
-  }
-};
-
 // Function to fetch single settings based on the type
 const fetchSingleSetting = async (setting: keyof typeof settings) => {
  let url = "";
@@ -353,14 +339,22 @@ onMounted(() => {
     setError(`Socket.IO error: ${error.message}`);
   });
 
-  socket.on("frameInfo", (data: any) => {
-    console.log("Received frameInfo:", data);
+  socket.on("message", (data: any) => {
+	  console.log("Received MSG", JSON.stringify(data))
+	});
+
+
+	socket.on("cam", (data: any) => {
+	  console.log("Received CAM", JSON.stringify(data))
+	});
+
+  socket.on("fi", (data: any) => {
+    console.log("Received frameInfo:", JSON.stringify(data));
     Object.assign(frameInfo, data);
   });
 
   fetchDepthImage();
   fetchAmplImage();
-  fetchFrameInfo();
   fetchSettings();
   fetchDepthMinMax();
   fetchAmplMinMax();
@@ -371,7 +365,6 @@ onMounted(() => {
     intervalId = setInterval(() => {
       fetchDepthImage();
       fetchAmplImage();
-      fetchFrameInfo();
     }, 300);
   };
 
