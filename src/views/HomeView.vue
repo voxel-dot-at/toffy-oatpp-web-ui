@@ -322,8 +322,11 @@ onMounted(() => {
   loading.value = true;
 
   const instance = getCurrentInstance();
-
   const socket = instance!.appContext.config.globalProperties.$socket;
+
+  if (!socket.connected) {
+    socket.connect();
+  }
 
   socket.on("connect", () => {
     console.log("Socket.IO connected");
@@ -335,18 +338,17 @@ onMounted(() => {
     loading.value = false;
   });
 
-  socket.on("error", (error: { message: any; }) => {
+  socket.on("error", (error: { message: any }) => {
     setError(`Socket.IO error: ${error.message}`);
   });
 
   socket.on("message", (data: any) => {
-	  console.log("Received MSG", JSON.stringify(data))
-	});
+    console.log("Received MSG", JSON.stringify(data));
+  });
 
-
-	socket.on("cam", (data: any) => {
-	  console.log("Received CAM", JSON.stringify(data))
-	});
+  socket.on("cam", (data: any) => {
+    console.log("Received CAM", JSON.stringify(data));
+  });
 
   socket.on("fi", (data: any) => {
     console.log("Received frameInfo:", JSON.stringify(data));
@@ -384,15 +386,23 @@ onMounted(() => {
   };
 
   startInterval();
-
   document.addEventListener("visibilitychange", handleVisibilityChange);
 
   onUnmounted(() => {
     stopInterval();
     document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+    socket.off("connect");
+    socket.off("disconnect");
+    socket.off("error");
+    socket.off("message");
+    socket.off("cam");
+    socket.off("fi");
+
     socket.disconnect();
   });
 });
+
 </script>
 
 <template>
