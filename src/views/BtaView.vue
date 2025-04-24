@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios from "axios";
+import ky from "ky";
 import { onMounted, reactive, ref } from "vue";
 
 // State variables for components
@@ -22,11 +22,12 @@ const settings = reactive({
 // Function to fetch data from /api/bta and populate settings
 const fetchSettings = async () => {
   try {
-    const response = await axios.get("/api/bta");
-    Object.assign(settings, response.data);
+    const response = await ky.get("/api/bta").json() as number;
+    Object.assign(settings, response);
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to get settings: ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to get settings: ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -44,18 +45,19 @@ const fetchRegister = async () => {
     : parseInt(adressValue.value, 10);
 
   try {
-    const response = await axios.get(`/api/bta/reg/${adress}`);
-    registerAdress.value = response.data;
+    const response = await ky.get(`/api/bta/reg/${adress}`).json() as string;
+    registerAdress.value = response;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to get register address: ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to get register address: ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
   }
 };
 
-const postRegister = async () =>{
+const postRegister = async () => {
   if (!adressValue.value) {
     setError(`Please enter a valid Value for Register Adress`)
     return;
@@ -75,11 +77,12 @@ const postRegister = async () =>{
     : parseInt(registerValue.value, 10);
 
   try {
-    const response = await axios.post(`/api/bta/reg/${adress}/${value}`);
-    registerAdress.value = response.data;
+    const response = await ky.post(`/api/bta/reg/${adress}/${value}`).json() as string;
+    registerAdress.value = response;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to set register address: ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to set register address: ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -96,14 +99,15 @@ const postSetting = async (setting: keyof typeof settings, value: number | boole
   const url = `/api/bta/${setting}/${value}`;
 
   try {
-    await axios.post(url);
+    await ky.post(url);
     snackbarMessage.value = `${setting
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to set ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to set ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -149,7 +153,7 @@ onMounted(() => {
 
     <!-- Success Alert -->
     <v-snackbar v-model="snackbar" :timeout="2000" rounded="pill" color="success">
-    {{ snackbarMessage }}
+      {{ snackbarMessage }}
     </v-snackbar>
 
     <!-- Card with Textboxes, Buttons, and WBOX Data -->

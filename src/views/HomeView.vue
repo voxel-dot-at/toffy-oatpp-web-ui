@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import axios from "axios";
+import ky from "ky";
 import { getCurrentInstance, onMounted, onUnmounted, reactive, ref } from "vue";
 
 // State variables for components
@@ -35,21 +35,18 @@ const frameInfo = reactive({
 // Depth Image update function
 const fetchDepthImage = async () => {
   try {
-    const depthResponse = await axios.get("/api/frame/depth", {
-      responseType: "arraybuffer",
-      headers: {
-        "Cache-Control": "no-cache",
-      },
+    const response = await ky.get('/api/frame/depth', {
+      cache: 'no-store',
     });
 
-    // Convert depth image to Object URL
-    const depthUrl = URL.createObjectURL(new Blob([depthResponse.data]));
+    const arrayBuffer = await response.arrayBuffer();
+    const depthUrl = URL.createObjectURL(new Blob([arrayBuffer]));
 
-    // Set the Object URLs
     depthImage.value = depthUrl;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load Depth Image : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to load Depth Image : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -59,21 +56,18 @@ const fetchDepthImage = async () => {
 // Ampl Image update function
 const fetchAmplImage = async () => {
   try {
-    const amplResponse = await axios.get("/api/frame/ampl", {
-      responseType: "arraybuffer",
-      headers: {
-        "Cache-Control": "no-cache",
-      },
+    const response = await ky.get("/api/frame/ampl", {
+      cache: 'no-store'
     });
 
-    // Convert depth image to Object URL
-    const amplUrl = URL.createObjectURL(new Blob([amplResponse.data]));
+    const arrayBuffer = await response.arrayBuffer();
+    const amplUrl = URL.createObjectURL(new Blob([arrayBuffer]));
 
-    // Set the Object URLs
     amplImage.value = amplUrl;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load Amplitude Image : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to load Amplitude Image : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -83,11 +77,12 @@ const fetchAmplImage = async () => {
 // Function to fetch data from /api/bta and populate textboxes
 const fetchSettings = async () => {
   try {
-    const response = await axios.get("/api/bta");
-    Object.assign(settings, response.data);
+    const response = await ky.get("/api/bta").json() as number;
+    Object.assign(settings, response);
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load settings : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to load settings : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -97,14 +92,15 @@ const fetchSettings = async () => {
 // Function to fetch data from /api/frame/depthMinMaxVal and populate textboxes
 const fetchDepthMinMax = async () => {
   try {
-    const response = await axios.get("/api/frame/depthMinMaxVal");
-    Object.assign(depthMinMax, response.data);
+    const response = await ky.get("/api/frame/depthMinMaxVal").json() as number;
+    Object.assign(depthMinMax, response);
 
     depthMinMax.maxVal = parseFloat(depthMinMax.maxVal.toFixed(3));
     depthMinMax.minVal = parseFloat(depthMinMax.minVal.toFixed(3));
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load Depth Min & Max values : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to load Depth Min & Max values : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -114,14 +110,15 @@ const fetchDepthMinMax = async () => {
 // Function to fetch data from /api/frame/amplMinMaxVal and populate textboxes
 const fetchAmplMinMax = async () => {
   try {
-    const response = await axios.get("/api/frame/amplMinMaxVal");
-    Object.assign(amplMinMax, response.data);
+    const response = await ky.get("/api/frame/amplMinMaxVal").json() as number;
+    Object.assign(amplMinMax, response);
 
     amplMinMax.maxVal = parseFloat(amplMinMax.maxVal.toFixed(3));
     amplMinMax.minVal = parseFloat(amplMinMax.minVal.toFixed(3));
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to load Amplitude Min & Max values : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to load Amplitude Min & Max values : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -130,8 +127,8 @@ const fetchAmplMinMax = async () => {
 
 // Function to fetch single settings based on the type
 const fetchSingleSetting = async (setting: keyof typeof settings) => {
- let url = "";
- switch (setting) {
+  let url = "";
+  switch (setting) {
     case "integrationTime":
       url = `/api/bta/integrationTime`;
       break;
@@ -150,11 +147,12 @@ const fetchSingleSetting = async (setting: keyof typeof settings) => {
   }
 
   try {
-    const response = await axios.get(url);
-    settings[setting] = response.data;
+    const response = await ky.get(url).json() as number;
+    settings[setting] = response;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to get ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to get ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -164,7 +162,7 @@ const fetchSingleSetting = async (setting: keyof typeof settings) => {
 // Function to fetch single settings based on the type
 const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
   let url = "";
- switch (setting) {
+  switch (setting) {
     case "maxVal":
       url = `/api/frame/depthMaxVal`;
       break;
@@ -177,11 +175,12 @@ const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
   }
 
   try {
-    const response = await axios.get(url);
-    depthMinMax[setting] = response.data;
+    const response = await ky.get(url).json() as number;
+    depthMinMax[setting] = response;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to get ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to get ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -191,7 +190,7 @@ const fetchSingleDepthMinMax = async (setting: keyof typeof depthMinMax) => {
 // Function to fetch single settings based on the type
 const fetchSingleAmplMinMax = async (setting: keyof typeof amplMinMax) => {
   let url = "";
- switch (setting) {
+  switch (setting) {
     case "maxVal":
       url = `/api/frame/amplMaxVal`;
       break;
@@ -204,11 +203,12 @@ const fetchSingleAmplMinMax = async (setting: keyof typeof amplMinMax) => {
   }
 
   try {
-    const response = await axios.get(url);
-    depthMinMax[setting] = response.data;
+    const response = await ky.get(url).json() as number;
+    depthMinMax[setting] = response;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to get ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to get ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -237,14 +237,15 @@ const postSetting = async (setting: keyof typeof settings, value: number) => {
   }
 
   try {
-    await axios.post(url);
+    await ky.post(url);
     snackbarMessage.value = `${setting
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to set ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to set ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -267,14 +268,15 @@ const postDepthMinMax = async (setting: keyof typeof depthMinMax, value: number)
   }
 
   try {
-    await axios.post(url);
+    await ky.post(url);
     snackbarMessage.value = `${setting
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to set ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to set ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -297,14 +299,15 @@ const postAmplMinMax = async (setting: keyof typeof amplMinMax, value: number) =
   }
 
   try {
-    await axios.post(url);
+    await ky.post(url);
     snackbarMessage.value = `${setting
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/^\w/, (c) => c.toUpperCase())} successfully updated.`;
     snackbar.value = true;
   } catch (error: any) {
-    if (error.response && error.response.status === 400) {
-      setError(`Failed to set ${setting} : ${error.response.data}`);
+    if (error.response) {
+      const errorText = await error.response.text();
+      setError(`Failed to set ${setting} : ${errorText}`);
     } else {
       setError(`An unexpected error occurred: ${error.message}`);
     }
@@ -429,7 +432,7 @@ onMounted(() => {
 
     <!-- Success Alert -->
     <v-snackbar v-model="snackbar" :timeout="2000" rounded="pill" color="success">
-    {{ snackbarMessage }}
+      {{ snackbarMessage }}
     </v-snackbar>
 
     <v-row>
