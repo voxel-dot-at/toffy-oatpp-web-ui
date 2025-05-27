@@ -15,18 +15,18 @@
     "@mdi/font": "^7.4.47",
     "ky": "^1.8.1",
     "socket.io-client": "^4.8.1",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.0",
-    "vuetify": "^3.8.2"
+    "vue": "^3.5.15",
+    "vue-router": "^4.5.1",
+    "vuetify": "^3.8.7"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.5",
-    "@types/node": "^22.14.1",
-    "@vitejs/plugin-vue": "^5.2.3",
+    "@types/node": "^22.15.21",
+    "@vitejs/plugin-vue": "^5.2.4",
     "@vue/tsconfig": "^0.7.0",
-    "npm-run-all2": "^7.0.2",
+    "npm-run-all2": "^8.0.4",
     "typescript": "~5.8.3",
-    "vite": "^6.3.3",
+    "vite": "^6.3.5",
     "vue-tsc": "^2.2.10"
   }
 }
